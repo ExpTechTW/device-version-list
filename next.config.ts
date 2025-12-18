@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
   assetPrefix: basePath,
   images: {
     unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.simpleicons.org',
+      },
+    ],
   },
   trailingSlash: true,
   compiler: {

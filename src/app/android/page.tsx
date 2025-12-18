@@ -1,61 +1,53 @@
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/navbar";
 import { BrandIcon } from "@/components/brand-icon";
-import { ChevronRight, Building2 } from "lucide-react";
-import { getDataFile } from "@/lib/data";
-
-async function getAndroidData() {
-  const data = await getDataFile('android.json');
-  return data || [];
-}
+import { Smartphone, ChevronRight } from "lucide-react";
+import { getBrands } from "@/lib/data";
 
 export default async function AndroidPage() {
-  const androidData = await getAndroidData();
-  
+  const androidData = await getBrands() || [];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <Navbar showBack backHref="/" backLabel="返回首頁" />
-      <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
-        <div className="mb-6 sm:mb-8 lg:mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-xl bg-primary/10">
-              <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground mb-2 sm:mb-3">
-                Android 廠牌
-              </h1>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                選擇要查看的 Android 廠牌
-              </p>
-            </div>
+    <div className="min-h-screen bg-background relative">
+      {/* Gradient background */}
+      <div className="absolute inset-0 -z-10 gradient-bg" />
+
+      <Navbar showBack backHref="/" backLabel="返回" />
+
+      <main className="container mx-auto px-4 py-8 sm:py-10">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8 sm:mb-10">
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/50 dark:to-green-800/50 shadow-sm">
+            <Smartphone className="h-7 w-7 text-green-600 dark:text-green-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Android 廠牌</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {Array.isArray(androidData) ? androidData.length : 0} 個廠牌
+            </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {androidData.map((brand: { id: string; name: string; slug: string }) => (
-            <Link key={brand.id} href={`/android/${brand.slug}`} className="group">
-              <Card className="h-full hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-primary/50 bg-gradient-to-br from-card to-card/50 group-hover:scale-[1.02]">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3 mb-2">
-                    <BrandIcon brand={brand.slug} size={28} className="group-hover:scale-110 transition-transform" />
-                    <CardTitle className="text-lg sm:text-xl flex-1">{brand.name}</CardTitle>
+        {/* Brand Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          {Array.isArray(androidData) && androidData.map((brand: { id: string; name: string; slug: string }) => (
+            <Link key={brand.id} href={`/android/${brand.slug}`}>
+              <Card className="h-full glass-card border-0 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <BrandIcon brand={brand.slug} size={28} />
+                      <span className="font-semibold text-base text-gray-900 dark:text-white">{brand.name}</span>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground/40 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                    查看型號列表
-                    <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
                 </CardContent>
               </Card>
             </Link>
           ))}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
-

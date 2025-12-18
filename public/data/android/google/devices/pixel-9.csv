@@ -1,0 +1,17 @@
+key,value
+name,Pixel 9
+brand,google
+d,2024-08-22
+iv,14
+v,15
+bv,16 DP2
+r,1
+s,2
+lastUpdated,2024-12-18
+
+versions
+version,releaseDate,beta
+16 DP2,2024-12-18,1
+16 DP1,2024-11-19,1
+15,2024-10-15,
+14,2024-08-22,

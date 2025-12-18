@@ -1,28 +1,21 @@
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { BrandIcon } from "@/components/brand-icon";
-import { Calendar, Smartphone, Shield, Wrench, CheckCircle, XCircle, Code, Clock, Package, Info, List } from "lucide-react";
-import { getDataFile } from "@/lib/data";
-
-async function getAndroidData() {
-  const data = await getDataFile('android.json');
-  return data || [];
-}
-
-async function getDeviceInfo(brand: string, model: string) {
-  const data = await getDataFile(`${model}.json`);
-  return data || null;
-}
+import { Calendar, Smartphone, Shield, CheckCircle, XCircle, Code, FlaskConical } from "lucide-react";
+import { getBrands, getBrandDevices, getAndroidDeviceDetail } from "@/lib/data";
+import { DeviceVersionList } from "@/components/device-version-list";
 
 export async function generateStaticParams() {
-  const androidData = await getAndroidData();
+  const androidData = await getBrands() || [];
   const params: { brand: string; model: string }[] = [];
-  
+
+  if (!Array.isArray(androidData)) return params;
+
   for (const brand of androidData) {
     try {
-      const models = await getDataFile(`${brand.slug}.json`);
+      const models = await getBrandDevices(brand.slug);
       if (models && Array.isArray(models)) {
         for (const model of models) {
           params.push({
@@ -31,12 +24,11 @@ export async function generateStaticParams() {
           });
         }
       }
-    } catch (error) {
-      // 忽略不存在的檔案
-      console.warn(`Brand file not found: ${brand.slug}.json`);
+    } catch {
+      // ignore
     }
   }
-  
+
   return params;
 }
 
@@ -46,17 +38,18 @@ export default async function ModelPage({
   params: Promise<{ brand: string; model: string }>;
 }) {
   const { brand, model } = await params;
-  const androidData = await getAndroidData();
-  const brandInfo = androidData.find((b: { slug: string }) => b.slug === brand);
-  const device = await getDeviceInfo(brand, model);
+  const androidData = await getBrands() || [];
+  const brandInfo = Array.isArray(androidData) ? androidData.find((b: { slug: string }) => b.slug === brand) : null;
+  const device = await getAndroidDeviceDetail(brand, model);
 
   if (!device) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <Navbar showBack backHref={`/android/${brand}`} backLabel="返回型號列表" />
+      <div className="min-h-screen bg-background">
+        <Navbar showBack backHref={`/android/${brand}`} backLabel="返回" />
         <div className="container mx-auto px-4 py-12 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-4">找不到此裝置資訊</h1>
+            <Smartphone className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+            <h1 className="text-2xl font-bold mb-4">找不到此裝置資訊</h1>
             <Link href={`/android/${brand}`}>
               <Button>返回型號列表</Button>
             </Link>
@@ -66,130 +59,110 @@ export default async function ModelPage({
     );
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusStyle = (status: string) => {
     switch (status) {
       case "持續更新":
-        return "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20";
+        return "text-green-600 dark:text-green-400 bg-green-500/10";
       case "基本安全更新":
-        return "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20";
+        return "text-yellow-600 dark:text-yellow-400 bg-yellow-500/10";
       case "過時":
-        return "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20";
+        return "text-red-600 dark:text-red-400 bg-red-500/10";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "text-muted-foreground bg-muted";
     }
   };
 
-  const InfoItem = ({ icon: Icon, label, value, className = "" }: { icon: any; label: string; value: string; className?: string }) => (
-    <div className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 sm:p-4 rounded-lg border bg-card/50 ${className}`}>
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-        </div>
-        <span className="text-sm text-muted-foreground min-w-[140px] sm:min-w-[180px]">{label}</span>
-      </div>
-      <span className="font-medium text-sm sm:text-base ml-0 sm:ml-auto">{value}</span>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <Navbar showBack backHref={`/android/${brand}`} backLabel="返回型號列表" />
-      <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12 max-w-5xl">
+    <div className="min-h-screen bg-background">
+      <Navbar showBack backHref={`/android/${brand}`} backLabel="返回" />
+
+      <main className="container mx-auto px-4 py-6 sm:py-8 max-w-3xl">
+        {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <BrandIcon brand={brand} size={48} className="hidden sm:block" />
-            <BrandIcon brand={brand} size={40} className="sm:hidden" />
-            <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground mb-2">
-                {device.name}
-              </h1>
-              <p className="text-sm sm:text-base text-muted-foreground flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                {brandInfo?.name}
-              </p>
-            </div>
+          <div className="flex items-center gap-3 mb-2">
+            <BrandIcon brand={brand} size={32} />
+            <span className="text-sm text-muted-foreground">{brandInfo?.name}</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900 dark:text-white">{device.name}</h1>
+
+          <div className="flex flex-wrap gap-2">
+            <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusStyle(device.status)}`}>
+              {device.status}
+            </span>
+            {device.rootable !== undefined && (
+              <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1 ${device.rootable
+                  ? 'text-orange-600 dark:text-orange-400 bg-orange-500/10'
+                  : 'text-muted-foreground bg-muted'
+                }`}>
+                {device.rootable ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                {device.rootable ? '可 Root' : '不可 Root'}
+              </span>
+            )}
           </div>
         </div>
 
-        <div className="grid gap-4 sm:gap-6">
-          <Card className="border-2 bg-gradient-to-br from-card to-card/50">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Info className="h-5 w-5 text-primary" />
-                <CardTitle className="text-xl sm:text-2xl">基本資訊</CardTitle>
-              </div>
+        <div className="space-y-4">
+          {/* Basic Info */}
+          <Card className="glass-card border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-medium text-gray-900 dark:text-white">基本資訊</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <InfoItem icon={Calendar} label="發佈時間" value={device.releaseDate} />
-              <InfoItem icon={Smartphone} label="發布時官方作業系統版本" value={device.initialOSVersion} />
-              <InfoItem icon={Shield} label="官方最高可用版本" value={device.latestOfficialVersion} />
-              <InfoItem icon={Code} label="非官方最高可用版本" value={device.latestUnofficialVersion} />
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 sm:p-4 rounded-lg border bg-card/50">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Wrench className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                  </div>
-                  <span className="text-sm text-muted-foreground min-w-[140px] sm:min-w-[180px]">是否可以 Root</span>
-                </div>
-                <div className="flex items-center gap-2 ml-0 sm:ml-auto">
-                  {device.rootable ? (
-                    <>
-                      <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                      <span className="font-medium text-sm sm:text-base">是</span>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                      <span className="font-medium text-sm sm:text-base">否</span>
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="p-3 sm:p-4 rounded-lg border bg-card/50">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                  <span className="text-sm text-muted-foreground min-w-[140px] sm:min-w-[180px]">狀態</span>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border ${getStatusColor(device.status)}`}>
-                    {device.status}
-                  </span>
-                </div>
-              </div>
+              <InfoRow icon={Calendar} label="發佈時間" value={device.releaseDate} />
+              <InfoRow icon={Smartphone} label="初始版本" value={device.initialOSVersion} />
+              <InfoRow
+                icon={Shield}
+                label="官方最新穩定版"
+                value={device.latestOfficialVersion}
+                badge={<span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400 ml-2">穩定</span>}
+              />
+              {device.latestBetaVersion && (
+                <InfoRow
+                  icon={FlaskConical}
+                  label="官方最新測試版"
+                  value={device.latestBetaVersion}
+                  badge={<span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-600 dark:text-orange-400 ml-2">Beta</span>}
+                />
+              )}
+              {device.latestUnofficialVersion && (
+                <InfoRow icon={Code} label="非官方最新版本" value={device.latestUnofficialVersion} />
+              )}
             </CardContent>
           </Card>
 
-          <Card className="border-2 bg-gradient-to-br from-card to-card/50">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <List className="h-5 w-5 text-primary" />
-                <div>
-                  <CardTitle className="text-xl sm:text-2xl">版本列表</CardTitle>
-                  <CardDescription>各版本發佈時間</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 sm:space-y-3">
-                {device.versions.map((version: { version: string; releaseDate: string }, index: number) => (
-                  <div key={index} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 sm:p-4 border rounded-lg bg-card/50 hover:bg-card transition-colors">
-                    <span className="font-medium text-sm sm:text-base">{version.version}</span>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      <span>{version.releaseDate}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Version History */}
+          <DeviceVersionList versions={device.versions} />
 
-          <Card className="border-2 bg-gradient-to-br from-card to-card/50">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>資料最後更新時間：{device.lastUpdated}</span>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Footer */}
+          <p className="text-xs text-muted-foreground text-center py-2">
+            資料更新時間：{device.lastUpdated}
+          </p>
         </div>
+      </main>
+    </div>
+  );
+}
+
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+  badge
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  badge?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Icon className="h-4 w-4" />
+        <span className="text-sm">{label}</span>
+      </div>
+      <div className="flex items-center">
+        <span className="text-sm font-medium text-gray-900 dark:text-white">{value}</span>
+        {badge}
       </div>
     </div>
   );

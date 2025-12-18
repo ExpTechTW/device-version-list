@@ -2,17 +2,55 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Search, Loader2, ArrowRight } from "lucide-react"
 import { BrandIcon } from "./brand-icon"
+
+// 從名稱生成 slug
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
+}
+
+// 判斷平台
+function getPlatform(filepath: string): 'ios' | 'android' | undefined {
+  if (filepath.startsWith('ios/')) return 'ios';
+  if (filepath.startsWith('android/')) return 'android';
+  return undefined;
+}
+
+// ETag 快取儲存
+const etagCache = new Map<string, { etag: string; data: Record<string, string>[] }>();
 
 async function fetchCSV(filepath: string) {
   try {
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
     const url = `${basePath}/data/${filepath}`;
-    const res = await fetch(url, { cache: 'force-cache' });
+
+    // 準備請求標頭
+    const headers: HeadersInit = {
+      'Accept-Encoding': 'gzip, deflate, br',
+    };
+
+    // 如果有快取的 ETag，加入 If-None-Match
+    const cached = etagCache.get(filepath);
+    if (cached?.etag) {
+      headers['If-None-Match'] = cached.etag;
+    }
+
+    const res = await fetch(url, {
+      cache: 'no-cache',
+      headers,
+    });
+
+    // 304 Not Modified - 使用快取資料
+    if (res.status === 304 && cached) {
+      return cached.data;
+    }
 
     if (!res.ok) return null;
 
@@ -20,22 +58,58 @@ async function fetchCSV(filepath: string) {
     const lines = content.trim().split('\n');
     if (lines.length < 2) return [];
 
-    const headers = lines[0].split(',').map(h => h.trim());
+    const csvHeaders = lines[0].split(',').map(h => h.trim());
     const rows: Record<string, string>[] = [];
+    const platform = getPlatform(filepath);
 
     for (let i = 1; i < lines.length; i++) {
       const values = lines[i].split(',').map(v => v.trim());
-      if (values.length === headers.length) {
+      if (values.length === csvHeaders.length) {
         const row: Record<string, string> = {};
-        headers.forEach((header, index) => {
-          row[header] = values[index];
+        csvHeaders.forEach((header, index) => {
+          // 處理欄位簡寫
+          switch (header) {
+            case 'd':
+              row['releaseDate'] = values[index];
+              break;
+            case 'v':
+              const ver = values[index];
+              row['latestOfficialVersion'] = platform === 'ios' ? `iOS ${ver}` : `Android ${ver}`;
+              break;
+            case 's':
+              const statusMap: Record<string, string> = { '0': '過時', '1': '基本安全更新', '2': '持續更新' };
+              row['status'] = statusMap[values[index]] || values[index];
+              break;
+            case 'j':
+              row['jailbreakable'] = values[index] === '1' ? 'true' : 'false';
+              break;
+            case 'r':
+              row['rootable'] = values[index] === '1' ? 'true' : 'false';
+              break;
+            default:
+              row[header] = values[index];
+          }
         });
+        // 生成 id 和 slug（如果有 name 但沒有 id/slug）
+        if (row['name'] && !row['id']) {
+          row['id'] = generateSlug(row['name']);
+          row['slug'] = generateSlug(row['name']);
+        }
         rows.push(row);
       }
     }
 
+    // 儲存 ETag 和資料到快取
+    const etag = res.headers.get('ETag');
+    if (etag) {
+      etagCache.set(filepath, { etag, data: rows });
+    }
+
     return rows;
   } catch {
+    // 發生錯誤時嘗試使用快取
+    const cached = etagCache.get(filepath);
+    if (cached) return cached.data;
     return null;
   }
 }
@@ -49,13 +123,14 @@ interface Device {
   brandSlug?: string
 }
 
-export function DeviceSearch() {
+export function HeroSearch() {
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const [devices, setDevices] = React.useState<Device[]>([])
   const [loading, setLoading] = React.useState(false)
   const router = useRouter()
 
+  // 監聽鍵盤快捷鍵
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -85,13 +160,12 @@ export function DeviceSearch() {
     try {
       const [iosData, brandsData] = await Promise.all([
         fetchCSV('ios/devices.csv').catch(() => []),
-        fetchCSV('brands.csv').catch(() => [])
+        fetchCSV('android/brands.csv').catch(() => [])
       ])
 
       const results: Device[] = []
       const lowerQuery = searchQuery.toLowerCase()
 
-      // 搜索 iOS 設備
       if (iosData && Array.isArray(iosData)) {
         for (const device of iosData) {
           if (device.name?.toLowerCase().includes(lowerQuery) ||
@@ -106,7 +180,6 @@ export function DeviceSearch() {
         }
       }
 
-      // 搜索 Android 設備
       if (brandsData && Array.isArray(brandsData)) {
         const androidBrands = brandsData.filter(b => b.platform === 'android')
 
@@ -169,26 +242,15 @@ export function DeviceSearch() {
 
   return (
     <>
-      {/* Mobile: Icon button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 shrink-0 md:hidden"
-        onClick={() => setOpen(true)}
-      >
-        <Search className="h-4 w-4" />
-      </Button>
-
-      {/* Desktop: Full search bar */}
       <Button
         variant="outline"
-        className="hidden md:flex relative h-9 w-48 lg:w-56 justify-start gap-2 text-sm text-muted-foreground bg-muted/50 border-border/50 hover:bg-muted hover:border-border shrink-0"
         onClick={() => setOpen(true)}
+        className="h-14 px-6 w-full max-w-md glass-input rounded-2xl text-base gap-3 text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all duration-300 shadow-lg hover:shadow-xl"
       >
-        <Search className="h-4 w-4 shrink-0" />
-        <span className="truncate">搜索裝置...</span>
-        <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium lg:flex">
-          <span className="text-xs">⌘</span>K
+        <Search className="h-5 w-5" />
+        <span>搜尋裝置型號...</span>
+        <kbd className="ml-auto hidden sm:inline-flex h-6 items-center gap-1 rounded-md border bg-background/80 px-2 font-mono text-xs">
+          ⌘K
         </kbd>
       </Button>
 
@@ -236,7 +298,7 @@ export function DeviceSearch() {
                       size={20}
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{device.name}</div>
+                      <div className="font-medium text-sm truncate text-gray-900 dark:text-white">{device.name}</div>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         {device.brand && (
                           <span className="text-xs text-muted-foreground">{device.brand}</span>
