@@ -33,54 +33,73 @@ export function DeviceVersionList({ versions }: DeviceVersionListProps) {
   const latestStableVersion = versions.find(v => !v.beta)?.version;
 
   return (
-    <Card className="glass-card border-0">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-medium text-gray-900 dark:text-white">版本歷史</CardTitle>
+    <Card className="glass-card border-0 overflow-hidden">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-sm font-semibold text-gray-900 dark:text-white">
+            版本歷史
+          </CardTitle>
           {hasBetaVersions && (
             <button
               onClick={() => setShowBeta(!showBeta)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full transition-all duration-200 ${
                 showBeta
-                  ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
-                  : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                  ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 ring-1 ring-orange-500/30'
+                  : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
             >
               <FlaskConical className="h-3 w-3" />
-              {showBeta ? '隱藏測試版' : `${betaCount} 個測試版`}
+              <span>{showBeta ? '隱藏測試版' : `顯示測試版 (${betaCount})`}</span>
             </button>
           )}
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
+      <CardContent className="pt-0 px-3 pb-3">
+        <div className="rounded-xl overflow-hidden bg-muted/20">
           {filteredVersions.map((version, index) => {
             const isLatestStable = version.version === latestStableVersion && !version.beta;
+            const isLast = index === filteredVersions.length - 1;
 
             return (
               <div
                 key={index}
-                className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-muted/50 transition-colors"
+                className={`flex items-center justify-between px-3 py-2.5 transition-colors ${
+                  !isLast ? 'border-b border-border/30' : ''
+                } ${
+                  isLatestStable
+                    ? 'bg-green-500/10'
+                    : version.beta
+                    ? 'bg-orange-500/5'
+                    : 'hover:bg-muted/30'
+                }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm text-gray-900 dark:text-white">
+                  <span className={`font-mono text-xs font-semibold ${
+                    isLatestStable
+                      ? 'text-green-600 dark:text-green-400'
+                      : version.beta
+                      ? 'text-orange-600 dark:text-orange-400'
+                      : 'text-gray-900 dark:text-white'
+                  }`}>
                     {version.version}
                   </span>
+                  {isLatestStable && (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-green-500/15 text-green-600 dark:text-green-400">
+                      <div className="w-1 h-1 rounded-full bg-green-500"></div>
+                      最新
+                    </span>
+                  )}
                   {version.beta && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-600 dark:text-orange-400">
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-orange-500/15 text-orange-600 dark:text-orange-400">
+                      <FlaskConical className="h-2.5 w-2.5" />
                       Beta
                     </span>
                   )}
-                  {isLatestStable && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">
-                      最新穩定版
-                    </span>
-                  )}
                 </div>
-                <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" />
-                  {version.releaseDate}
-                </span>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Clock className="h-3 w-3 opacity-60" />
+                  <span>{version.releaseDate}</span>
+                </div>
               </div>
             );
           })}

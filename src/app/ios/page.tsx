@@ -12,24 +12,29 @@ export default async function IOSPage() {
       {/* Gradient background */}
       <div className="absolute inset-0 -z-10 gradient-bg" />
 
+      {/* Decorative blurred shapes */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -left-24 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-primary/8 rounded-full blur-3xl" />
+      </div>
+
       <Navbar showBack backHref="/" backLabel="返回" />
 
-      <main className="container mx-auto px-4 py-8 sm:py-10">
+      <main className="container mx-auto px-4 py-4 sm:py-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8 sm:mb-10">
-          <div className="p-3 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 shadow-sm">
-            <Apple className="h-7 w-7 text-foreground" />
-          </div>
+        <div className="flex items-center gap-3 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <Apple className="h-6 w-6 text-foreground" />
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">iOS 裝置</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">iOS 裝置</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
               {Array.isArray(iosData) ? iosData.length : 0} 款裝置
             </p>
           </div>
         </div>
 
         {/* Device Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {Array.isArray(iosData) && iosData.map((device: {
             id: string;
             name: string;
@@ -38,7 +43,7 @@ export default async function IOSPage() {
             latestOfficialVersion?: string;
             status?: string;
             jailbreakable?: boolean;
-          }) => {
+          }, index: number) => {
             const getStatusStyle = (status?: string) => {
               switch (status) {
                 case "持續更新":
@@ -53,29 +58,34 @@ export default async function IOSPage() {
             };
 
             return (
-              <Link key={device.id} href={`/ios/${device.slug}`}>
-                <Card className="h-full glass-card border-0 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group">
-                  <CardContent className="p-5">
+              <Link 
+                key={device.id} 
+                href={`/ios/${device.slug}`}
+                className="animate-in fade-in slide-in-from-bottom-2 duration-500"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <Card className="h-full glass-card border-0 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group hover:border-primary/20">
+                  <CardContent className="p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-base text-gray-900 dark:text-white truncate mb-2.5">{device.name}</h3>
+                        <h3 className="font-semibold text-sm text-gray-900 dark:text-white truncate mb-1.5 group-hover:text-primary transition-colors">{device.name}</h3>
 
-                        <div className="space-y-2 text-sm text-muted-foreground">
+                        <div className="space-y-1 text-xs text-muted-foreground">
                           {device.releaseDate && (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="h-3 w-3 shrink-0 opacity-70" />
                               <span className="truncate">{device.releaseDate}</span>
                             </div>
                           )}
                           {device.latestOfficialVersion && (
-                            <div className="flex items-center gap-2">
-                              <Shield className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                            <div className="flex items-center gap-1.5">
+                              <Shield className="h-3 w-3 shrink-0 opacity-70" />
                               <span className="truncate">{device.latestOfficialVersion}</span>
                             </div>
                           )}
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-1.5 mt-3">
+                        <div className="flex flex-wrap items-center gap-1 mt-2">
                           {device.status && (
                             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getStatusStyle(device.status)}`}>
                               {device.status}
@@ -89,7 +99,7 @@ export default async function IOSPage() {
                         </div>
                       </div>
 
-                      <ChevronRight className="h-5 w-5 text-muted-foreground/40 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5" />
                     </div>
                   </CardContent>
                 </Card>

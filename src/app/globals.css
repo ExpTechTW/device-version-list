@@ -84,6 +84,7 @@
     -webkit-backdrop-filter: blur(12px) saturate(150%);
     border: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
   }
 
   .dark .glass-card {
@@ -106,6 +107,18 @@
   }
 
   /* Animated gradient background */
+  @keyframes gradient-animation {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
   .gradient-bg {
     background: linear-gradient(
       135deg,
@@ -113,6 +126,8 @@
       hsl(142 76% 36% / 0.04) 50%,
       hsl(280 65% 60% / 0.04) 100%
     );
+    background-size: 200% 200%;
+    animation: gradient-animation 15s ease infinite;
   }
 
   .dark .gradient-bg {

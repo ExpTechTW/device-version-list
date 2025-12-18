@@ -206,9 +206,9 @@ export function DeviceSearch() {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="glass-card max-w-[calc(100vw-2rem)] sm:max-w-lg p-0 gap-0 overflow-hidden">
+        <DialogContent className="glass-card max-w-[calc(100vw-2rem)] sm:max-w-lg p-0 gap-0 overflow-hidden border-0 shadow-xl">
           <DialogHeader className="px-4 pt-4 pb-2">
-            <DialogTitle className="text-base font-medium">搜索裝置</DialogTitle>
+            <DialogTitle className="text-base font-medium text-gray-900 dark:text-white">搜索裝置</DialogTitle>
           </DialogHeader>
           <div className="px-4 pb-4 space-y-3">
             <div className="relative">
@@ -217,44 +217,45 @@ export function DeviceSearch() {
                 placeholder="輸入裝置名稱..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="pl-9 h-10 bg-muted/50 border-0 focus-visible:ring-1"
+                className="pl-9 h-10 bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-primary/20 rounded-lg"
                 autoFocus
               />
             </div>
 
             {loading && (
-              <div className="py-8 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+              <div className="py-8 flex flex-col items-center justify-center gap-2 text-muted-foreground animate-in fade-in duration-300">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 <span className="text-sm">搜索中...</span>
               </div>
             )}
 
             {!loading && query && devices.length === 0 && (
-              <div className="py-8 flex flex-col items-center justify-center gap-1 text-muted-foreground">
+              <div className="py-8 flex flex-col items-center justify-center gap-1 text-muted-foreground animate-in fade-in duration-300">
                 <Search className="h-6 w-6 opacity-40" />
                 <span className="text-sm">找不到匹配的裝置</span>
               </div>
             )}
 
             {!loading && devices.length > 0 && (
-              <div className="max-h-[50vh] overflow-y-auto space-y-1">
-                {devices.map((device) => (
+              <div className="max-h-[50vh] overflow-y-auto space-y-1.5 scrollbar-thin">
+                {devices.map((device, index) => (
                   <button
                     key={`${device.type}-${device.id}`}
                     onClick={() => handleDeviceClick(device)}
-                    className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/80 transition-colors text-left group"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted/80 transition-all duration-200 text-left group border border-transparent hover:border-border/50 hover:shadow-sm"
+                    style={{ animationDelay: `${index * 30}ms` }}
                   >
                     <BrandIcon
                       brand={device.type === 'ios' ? 'ios' : device.brandSlug || 'android'}
                       size={20}
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{device.name}</div>
-                      <div className="flex items-center gap-1.5 mt-0.5">
+                      <div className="font-semibold text-sm truncate text-gray-900 dark:text-white group-hover:text-primary transition-colors">{device.name}</div>
+                      <div className="flex items-center gap-1.5 mt-1">
                         {device.brand && (
                           <span className="text-xs text-muted-foreground">{device.brand}</span>
                         )}
-                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${device.type === 'ios'
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${device.type === 'ios'
                             ? 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
                             : 'bg-green-500/10 text-green-600 dark:text-green-400'
                           }`}>
@@ -262,14 +263,14 @@ export function DeviceSearch() {
                         </span>
                       </div>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
                   </button>
                 ))}
               </div>
             )}
 
             {!loading && !query && (
-              <div className="py-8 flex flex-col items-center justify-center gap-1 text-muted-foreground">
+              <div className="py-8 flex flex-col items-center justify-center gap-1 text-muted-foreground animate-in fade-in duration-300">
                 <span className="text-sm">輸入關鍵字開始搜索</span>
               </div>
             )}

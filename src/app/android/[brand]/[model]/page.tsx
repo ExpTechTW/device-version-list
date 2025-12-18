@@ -79,52 +79,54 @@ export default async function ModelPage({
 
       <Navbar showBack backHref={`/android/${brand}`} backLabel="返回" />
 
-      <main className="container mx-auto px-4 py-6 sm:py-8 max-w-3xl">
+      <main className="container mx-auto px-4 py-4 sm:py-6 max-w-3xl">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <BrandIcon brand={brand} size={32} />
-            <span className="text-sm text-muted-foreground">{brandInfo?.name}</span>
+        <div className="mb-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="flex items-center gap-2 mb-2">
+            <BrandIcon brand={brand} size={24} />
+            <span className="text-xs text-muted-foreground">{brandInfo?.name}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900 dark:text-white">{device.name}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-white">{device.name}</h1>
 
-          <div className="flex flex-wrap gap-2">
-            <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusStyle(device.status)}`}>
+          <div className="flex flex-wrap gap-1.5">
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getStatusStyle(device.status)}`}>
               {device.status}
             </span>
             {device.rootable !== undefined && (
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1 ${device.rootable
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${device.rootable
                   ? 'text-orange-600 dark:text-orange-400 bg-orange-500/10'
                   : 'text-slate-600 dark:text-slate-400 bg-slate-500/10'
                 }`}>
-                {device.rootable ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                {device.rootable ? <CheckCircle className="h-2.5 w-2.5" /> : <XCircle className="h-2.5 w-2.5" />}
                 {device.rootable ? '可 Root' : '不可 Root'}
               </span>
             )}
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-700">
           {/* Basic Info */}
           <Card className="glass-card border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-medium text-gray-900 dark:text-white">基本資訊</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold text-gray-900 dark:text-white">
+                基本資訊
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-0">
               <InfoRow icon={Calendar} label="發佈時間" value={device.releaseDate} />
               <InfoRow icon={Smartphone} label="初始版本" value={device.initialOSVersion} />
               <InfoRow
                 icon={Shield}
                 label="官方最新穩定版"
                 value={device.latestOfficialVersion}
-                badge={<span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400 ml-2">穩定</span>}
+                badge={<span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 ml-2 font-medium">穩定</span>}
               />
               {device.latestBetaVersion && (
                 <InfoRow
                   icon={FlaskConical}
                   label="官方最新測試版"
                   value={device.latestBetaVersion}
-                  badge={<span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-600 dark:text-orange-400 ml-2">Beta</span>}
+                  badge={<span className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 ml-2 font-medium">Beta</span>}
                 />
               )}
               {device.latestUnofficialVersion && (
@@ -137,7 +139,7 @@ export default async function ModelPage({
           <DeviceVersionList versions={device.versions} />
 
           {/* Footer */}
-          <p className="text-xs text-muted-foreground text-center py-2">
+          <p className="text-[10px] text-muted-foreground text-center py-1">
             資料更新時間：{device.lastUpdated}
           </p>
         </div>
@@ -158,13 +160,13 @@ function InfoRow({
   badge?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+    <div className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
       <div className="flex items-center gap-2 text-muted-foreground">
-        <Icon className="h-4 w-4" />
-        <span className="text-sm">{label}</span>
+        <Icon className="h-3.5 w-3.5" />
+        <span className="text-xs">{label}</span>
       </div>
-      <div className="flex items-center">
-        <span className="text-sm font-medium text-gray-900 dark:text-white">{value}</span>
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-semibold text-gray-900 dark:text-white">{value}</span>
         {badge}
       </div>
     </div>
