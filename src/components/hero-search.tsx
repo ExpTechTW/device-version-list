@@ -174,16 +174,16 @@ export function HeroSearch() {
               id: device.id,
               name: device.name,
               slug: device.slug,
-              type: 'ios'
+              type: 'ios',
+              brand: 'Apple',
+              brandSlug: 'apple'
             })
           }
         }
       }
 
       if (brandsData && Array.isArray(brandsData)) {
-        const androidBrands = brandsData.filter(b => b.platform === 'android')
-
-        for (const brand of androidBrands) {
+        for (const brand of brandsData) {
           try {
             const models = await fetchCSV(`android/${brand.slug}/devices.csv`)
             if (models && Array.isArray(models)) {
@@ -303,8 +303,8 @@ export function HeroSearch() {
                         {device.brand && (
                           <span className="text-xs text-muted-foreground">{device.brand}</span>
                         )}
-                        <span className={`text-[10px] px-1 py-0.5 rounded ${device.type === 'ios'
-                            ? 'bg-primary/10 text-primary'
+                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${device.type === 'ios'
+                            ? 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
                             : 'bg-green-500/10 text-green-600 dark:text-green-400'
                           }`}>
                           {device.type === 'ios' ? 'iOS' : 'Android'}

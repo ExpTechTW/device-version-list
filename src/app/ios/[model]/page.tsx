@@ -53,7 +53,10 @@ export default async function IOSModelPage({
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Gradient background */}
+      <div className="absolute inset-0 -z-10 gradient-bg" />
+
       <Navbar showBack backHref="/ios" backLabel="返回" />
 
       <main className="container mx-auto px-4 py-6 sm:py-8 max-w-3xl">
@@ -73,7 +76,7 @@ export default async function IOSModelPage({
             {device.jailbreakable !== undefined && (
               <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1 ${device.jailbreakable
                   ? 'text-purple-600 dark:text-purple-400 bg-purple-500/10'
-                  : 'text-muted-foreground bg-muted'
+                  : 'text-slate-600 dark:text-slate-400 bg-slate-500/10'
                 }`}>
                 {device.jailbreakable ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
                 {device.jailbreakable ? '可越獄' : '不可越獄'}

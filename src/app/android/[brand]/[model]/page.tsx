@@ -73,7 +73,10 @@ export default async function ModelPage({
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Gradient background */}
+      <div className="absolute inset-0 -z-10 gradient-bg" />
+
       <Navbar showBack backHref={`/android/${brand}`} backLabel="返回" />
 
       <main className="container mx-auto px-4 py-6 sm:py-8 max-w-3xl">
@@ -92,7 +95,7 @@ export default async function ModelPage({
             {device.rootable !== undefined && (
               <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1 ${device.rootable
                   ? 'text-orange-600 dark:text-orange-400 bg-orange-500/10'
-                  : 'text-muted-foreground bg-muted'
+                  : 'text-slate-600 dark:text-slate-400 bg-slate-500/10'
                 }`}>
                 {device.rootable ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
                 {device.rootable ? '可 Root' : '不可 Root'}

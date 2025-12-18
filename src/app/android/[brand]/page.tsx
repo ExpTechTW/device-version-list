@@ -110,14 +110,14 @@ export default async function BrandPage({
                             )}
                           </div>
 
-                          <div className="flex items-center gap-2 mt-3">
+                          <div className="flex flex-wrap items-center gap-1.5 mt-3">
                             {model.status && (
-                              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusStyle(model.status)}`}>
+                              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getStatusStyle(model.status)}`}>
                                 {model.status}
                               </span>
                             )}
                             {isRootable && (
-                              <span className="text-xs font-medium px-2.5 py-1 rounded-full text-orange-600 dark:text-orange-400 bg-orange-500/10">
+                              <span className="text-xs font-medium px-2 py-0.5 rounded-full text-orange-600 dark:text-orange-400 bg-orange-500/10">
                                 可 Root
                               </span>
                             )}

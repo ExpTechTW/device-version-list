@@ -75,14 +75,14 @@ export default async function IOSPage() {
                           )}
                         </div>
 
-                        <div className="flex items-center gap-2 mt-3">
+                        <div className="flex flex-wrap items-center gap-1.5 mt-3">
                           {device.status && (
-                            <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusStyle(device.status)}`}>
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getStatusStyle(device.status)}`}>
                               {device.status}
                             </span>
                           )}
                           {device.jailbreakable && (
-                            <span className="text-xs font-medium px-2.5 py-1 rounded-full text-purple-600 dark:text-purple-400 bg-purple-500/10">
+                            <span className="text-xs font-medium px-2 py-0.5 rounded-full text-purple-600 dark:text-purple-400 bg-purple-500/10">
                               可越獄
                             </span>
                           )}

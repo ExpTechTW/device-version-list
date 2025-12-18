@@ -8,6 +8,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search, Loader2, ArrowRight } from "lucide-react"
 import { BrandIcon } from "./brand-icon"
 
+// 從名稱生成 slug
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
+}
+
 async function fetchCSV(filepath: string) {
   try {
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
@@ -30,6 +38,11 @@ async function fetchCSV(filepath: string) {
         headers.forEach((header, index) => {
           row[header] = values[index];
         });
+        // 如果有 name 但沒有 id/slug，自動生成
+        if (row['name'] && !row['id']) {
+          row['id'] = generateSlug(row['name']);
+          row['slug'] = generateSlug(row['name']);
+        }
         rows.push(row);
       }
     }
@@ -100,7 +113,9 @@ export function DeviceSearch() {
               id: device.id,
               name: device.name,
               slug: device.slug,
-              type: 'ios'
+              type: 'ios',
+              brand: 'Apple',
+              brandSlug: 'apple'
             })
           }
         }
@@ -239,8 +254,8 @@ export function DeviceSearch() {
                         {device.brand && (
                           <span className="text-xs text-muted-foreground">{device.brand}</span>
                         )}
-                        <span className={`text-[10px] px-1 py-0.5 rounded ${device.type === 'ios'
-                            ? 'bg-primary/10 text-primary'
+                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${device.type === 'ios'
+                            ? 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
                             : 'bg-green-500/10 text-green-600 dark:text-green-400'
                           }`}>
                           {device.type === 'ios' ? 'iOS' : 'Android'}
