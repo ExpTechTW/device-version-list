@@ -85,7 +85,7 @@ export function DeviceSearch() {
     try {
       const [iosData, brandsData] = await Promise.all([
         fetchCSV('ios/devices.csv').catch(() => []),
-        fetchCSV('brands.csv').catch(() => [])
+        fetchCSV('android/brands.csv').catch(() => [])
       ])
 
       const results: Device[] = []
@@ -108,9 +108,7 @@ export function DeviceSearch() {
 
       // 搜索 Android 設備
       if (brandsData && Array.isArray(brandsData)) {
-        const androidBrands = brandsData.filter(b => b.platform === 'android')
-
-        for (const brand of androidBrands) {
+        for (const brand of brandsData) {
           try {
             const models = await fetchCSV(`android/${brand.slug}/devices.csv`)
             if (models && Array.isArray(models)) {

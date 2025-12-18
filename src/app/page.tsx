@@ -3,9 +3,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { HeroSearch } from "@/components/hero-search";
-import { Smartphone, Apple, ArrowRight, Zap, Shield, Clock } from "lucide-react";
+import { BrandIcon } from "@/components/brand-icon";
+import { Smartphone, Apple, ArrowRight, Zap, Shield, Clock, ChevronRight } from "lucide-react";
+import { getIOSDevices, getBrands, getBrandDevices } from "@/lib/data";
 
-export default function Home() {
+export default async function Home() {
+  // 取得 iOS 裝置數量
+  const iosDevices = await getIOSDevices();
+  const iosCount = Array.isArray(iosDevices) ? iosDevices.length : 0;
+
+  // 取得 Android 品牌和裝置數量
+  const brands = await getBrands();
+  const brandList = Array.isArray(brands) ? brands : [];
+
+  // 計算 Android 總裝置數量
+  let androidCount = 0;
+  for (const brand of brandList) {
+    const devices = await getBrandDevices(brand.slug as string);
+    if (Array.isArray(devices)) {
+      androidCount += devices.length;
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background relative">
       {/* Gradient background */}
@@ -43,7 +62,7 @@ export default function Home() {
         </div>
 
         {/* Platform Cards */}
-        <div className="grid sm:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto mb-20">
+        <div className="grid sm:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto mb-16">
           <Link href="/ios" className="group">
             <Card className="h-full glass-card border-0 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
               <CardHeader className="pb-4">
@@ -53,7 +72,7 @@ export default function Home() {
                   </div>
                   <div>
                     <CardTitle className="text-2xl text-gray-900 dark:text-white">iOS</CardTitle>
-                    <CardDescription className="text-base">iPhone 系列裝置</CardDescription>
+                    <CardDescription className="text-base">{iosCount} 款 iPhone 裝置</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -78,7 +97,7 @@ export default function Home() {
                   </div>
                   <div>
                     <CardTitle className="text-2xl text-gray-900 dark:text-white">Android</CardTitle>
-                    <CardDescription className="text-base">多品牌裝置支援</CardDescription>
+                    <CardDescription className="text-base">{androidCount} 款裝置・{brandList.length} 個品牌</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -94,6 +113,33 @@ export default function Home() {
             </Card>
           </Link>
         </div>
+
+        {/* Brand Cards Section */}
+        {brandList.length > 0 && (
+          <div className="max-w-4xl mx-auto mb-20">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Android 品牌</h2>
+              <Link href="/android" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                查看全部
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+              {brandList.slice(0, 8).map((brand: { id?: string; name: string; slug: string }) => (
+                <Link key={brand.id || brand.slug} href={`/android/${brand.slug}`}>
+                  <Card className="glass-card border-0 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <BrandIcon brand={brand.slug} size={24} />
+                        <span className="font-medium text-sm text-gray-900 dark:text-white truncate">{brand.name}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Features Section */}
         <div className="max-w-4xl mx-auto">
