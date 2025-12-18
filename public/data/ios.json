@@ -1,0 +1,38 @@
+[
+  {
+    "id": "iphone-15-pro",
+    "name": "iPhone 15 Pro",
+    "slug": "iphone-15-pro",
+    "releaseDate": "2023-09-22",
+    "latestOfficialVersion": "iOS 18.2",
+    "status": "持續更新",
+    "jailbreakable": true
+  },
+  {
+    "id": "iphone-15",
+    "name": "iPhone 15",
+    "slug": "iphone-15",
+    "releaseDate": "2023-09-22",
+    "latestOfficialVersion": "iOS 18.2",
+    "status": "持續更新",
+    "jailbreakable": true
+  },
+  {
+    "id": "iphone-14-pro",
+    "name": "iPhone 14 Pro",
+    "slug": "iphone-14-pro",
+    "releaseDate": "2022-09-16",
+    "latestOfficialVersion": "iOS 18.2",
+    "status": "持續更新",
+    "jailbreakable": true
+  },
+  {
+    "id": "iphone-14",
+    "name": "iPhone 14",
+    "slug": "iphone-14",
+    "releaseDate": "2022-09-16",
+    "latestOfficialVersion": "iOS 18.2",
+    "status": "持續更新",
+    "jailbreakable": true
+  }
+]

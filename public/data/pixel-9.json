@@ -1,0 +1,24 @@
+{
+  "id": "pixel-9",
+  "name": "Pixel 9",
+  "slug": "pixel-9",
+  "brand": "google",
+  "releaseDate": "2024-10-10",
+  "initialOSVersion": "Android 15",
+  "latestOfficialVersion": "Android 15",
+  "latestUnofficialVersion": "Android 15 (LineageOS 22)",
+  "rootable": true,
+  "status": "持續更新",
+  "versions": [
+    {
+      "version": "Android 15",
+      "releaseDate": "2024-10-10"
+    },
+    {
+      "version": "Android 15.1",
+      "releaseDate": "2024-11-15"
+    }
+  ],
+  "lastUpdated": "2024-12-20"
+}
+
